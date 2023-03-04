@@ -32,4 +32,20 @@ public class MatrixHandler : MonoBehaviour
         lineMatrix[s1, s2] = 0;
         lineMatrix[s2, s1] = 0;
     }
+
+
+
+    public void createMatrix(int[,] adjMatrix){
+        List<Vector3> posMatrix = new List<Vector3>();
+        int size = adjMatrix.GetLength(0) * adjMatrix.GetLength(1);
+        
+
+        /*
+            assign first node to 0,0
+            for all items in adjm 
+            check if line cross using a linear line cross cal
+            get all points radius and match based on crossovers 
+        */
+    }
+
 }

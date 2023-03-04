@@ -66,6 +66,7 @@ public class LineDrawer : MonoBehaviour
     }
 
     public void DrawFinalLine(GameObject s1, GameObject s2){
+        
         newLine = new GameObject();
         lineRender = newLine.AddComponent<LineRenderer>();
         lineRender.startWidth = lineWidth;
