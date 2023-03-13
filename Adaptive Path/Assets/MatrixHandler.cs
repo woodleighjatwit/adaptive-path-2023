@@ -1,51 +1,135 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+
+public class Vertex{
+    public Vector3 displacement;
+    public GameObject nodeObject;
+}
+
+public class Edge{
+    public Vertex vert1;
+    public Vertex vert2;
+    public int length;
+}
 
 public class MatrixHandler : MonoBehaviour
 {
-    public static int[,] connectionMatrix;
+    public static int[,] adjMatrix;
     public static int[,] lineMatrix;
     // Start is called before the first frame update
     void Start()
     {   
-        connectionMatrix = new int[4, 4] {{0, 1, 0, 1}, {1, 0, 1, 0}, {0, 1, 0, 1}, {1, 0, 1, 0}};
+        adjMatrix = new int[4, 4] {{0, 6, 0, 10}, {6, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
         lineMatrix = new int[4, 4];
     }
 
-    // Update is called once per frame
-    void Update()
-    {
+    public void FruchtermanReingold(List<GameObject> nodeList, int maxIterations, float initialTemp, float coolingFactor, float x, float y, float z){
+        int iteration = 1;
+        float averageLength = findAverageLength(adjMatrix);
+        Debug.Log("Average length: " + averageLength);
+        float temp = initialTemp;
+
+
+        List<Vertex> vertexList = new List<Vertex>();
+        List<Edge> edgeList = new List<Edge>();
+
+        for(int i=0; i<nodeList.Count; i++){
+            Vertex v = new Vertex();
+            v.nodeObject = nodeList[i];
+            vertexList.Add(v);
+        }
+
+        for (int i=0; i<adjMatrix.GetLength(0)-1; i++){
+            for (int t=i+1; t<adjMatrix.GetLength(1); t++){
+                if(adjMatrix[i, t] != 0 && i < t){
+                    Edge e = new Edge();
+                    e.vert1 = vertexList[i];
+                    e.vert2 = vertexList[t];
+                    e.length = adjMatrix[i, t];
+                    edgeList.Add(e);
+                }               
+            }
+        }
+
+        while (iteration < maxIterations && temp > 0){
+            repulsiveForce(vertexList, adjMatrix, averageLength);
+            attractiveForce(edgeList);
+            vertexPlacement(vertexList, temp, x, y, z);
+            temp = temperature(temp, coolingFactor, iteration);
+            iteration++;
+            
+        }
         
+
     }
 
-    public static bool checkConnection(int s1, int s2){
-        return connectionMatrix[s1, s2] == 1;
+    private void repulsiveForce(List<Vertex> vertexList, int[,] adjMatrix, float averageLength){
+        Vector3 delta;
+        float k;
+        float mag;
+        for(int i=0; i<vertexList.Count; i++){
+            vertexList[i].displacement = new Vector3(0, 0 ,0);
+            
+            for(int t=0; t<vertexList.Count; t++){
+                if (i != t){
+                    if(adjMatrix[i, t] == 0){
+                        k = averageLength;
+                    }
+                    else{
+                        k = adjMatrix[i, t];
+                    }
+                    delta = vertexList[i].nodeObject.transform.position - vertexList[t].nodeObject.transform.position;
+                    mag = Vector3.Magnitude(delta);
+                    vertexList[i].displacement += ((delta) / mag) * ((-k * k) / mag);
+                }
+            }
+        }
     }
 
-    public static void createConnection(int s1, int s2){
-        lineMatrix[s1, s2] = 1;
-        lineMatrix[s2, s1] = 1;
+    private void attractiveForce(List<Edge> edgeList){
+        Vector3 delta;
+        float mag;
+        for(int i=0; i<edgeList.Count; i++){
+           delta = edgeList[i].vert1.nodeObject.transform.position - edgeList[i].vert2.nodeObject.transform.position;
+           mag = Vector3.Magnitude(delta);
+           edgeList[i].vert1.displacement += -(delta / mag) * ((mag * mag) / edgeList[i].length);
+           edgeList[i].vert2.displacement += (delta / mag) * ((mag * mag) / edgeList[i].length);
+        }
     }
 
-    public static void removeConnection(int s1, int s2){
-        lineMatrix[s1, s2] = 0;
-        lineMatrix[s2, s1] = 0;
+    private void vertexPlacement(List<Vertex> vertexList, float temp, float x, float y, float z){
+        Vector3 pos;
+        float mag;
+
+        foreach(Vertex v in vertexList){
+            mag = Vector3.Magnitude(v.displacement);
+            pos = v.nodeObject.transform.position + ((v.displacement / mag) * Mathf.Min(mag, temp));
+            pos[0] = Mathf.Min(x/2, Mathf.Max(-x/2, pos[0]));
+            pos[1] = Mathf.Min(y/2, Mathf.Max(-y/2, pos[1]));
+            pos[2] = Mathf.Min(z/2, Mathf.Max(-z/2, pos[2]));
+            
+            v.nodeObject.transform.position = pos;
+            
+        }
     }
 
-
-
-    public void createMatrix(int[,] adjMatrix){
-        List<Vector3> posMatrix = new List<Vector3>();
-        int size = adjMatrix.GetLength(0) * adjMatrix.GetLength(1);
-        
-
-        /*
-            assign first node to 0,0
-            for all items in adjm 
-            check if line cross using a linear line cross cal
-            get all points radius and match based on crossovers 
-        */
+    private float temperature(float temp, float coolingFactor, int iteration){
+        return temp * (Mathf.Pow(coolingFactor, iteration));
     }
 
+    private float findAverageLength(int[,] adjMatrix){
+        float length = 0;
+        int num = 0;
+        for (int i=0; i<adjMatrix.GetLength(0); i++){
+            for (int t=0; t<adjMatrix.GetLength(1); t++){
+                if (adjMatrix[i, t] != 0){
+                    length += adjMatrix[i, t];
+                    num++;
+                }
+            }
+        }
+        return length/(num);
+    }
 }

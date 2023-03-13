@@ -147,7 +147,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 430176976}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -357,7 +357,6 @@ GameObject:
   - component: {fileID: 1359566172}
   - component: {fileID: 1359566173}
   - component: {fileID: 1359566175}
-  - component: {fileID: 1359566174}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -406,21 +405,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b58f4343eb4bc3d428b5dc5a010ae55c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sphereList: []
-  sphereCount: 5
-  sphere: {fileID: 390026053656856390, guid: 34ed2f6c06648504ab909dfdc7e5106b, type: 3}
---- !u!114 &1359566174
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1359566170}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0611ff198a507f479e3b8bbfc7cb589, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  nodeObjects: []
+  nodeCount: 4
+  nodePrefab: {fileID: 390026053656856390, guid: 34ed2f6c06648504ab909dfdc7e5106b, type: 3}
+  matrixHandler: {fileID: 430176978}
 --- !u!114 &1359566175
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -4,16 +4,31 @@ using UnityEngine;
 
 public class Node : MonoBehaviour
 {
-    public bool isLocked = false;
     public Vector3 position;
-    public List<Vector3>[,] avaliableSpace; 
-    public List<Node> connectedNodes;
-    public bool hardLock;
+    public int nodeIndex;
+ 
     // hard lock list
 
     public Node(){
 
     }
+
+    public void setPosition(Vector3 pos){
+        position = pos;
+        transform.position = pos;
+    }
+
+    public Vector3 getPosition(){
+        return position;
+    }
+
+
+
+    /*
+ public bool isLocked = false;
+       public List<Vector3>[,] avaliableSpace; 
+    public List<Node> connectedNodes;
+    public bool hardLock;
     // gets radius between two points
     public float getRadiusFrom(Vector3 p1, Vector3 p2){
         return Vector3.Distance(p1, p2);
@@ -64,4 +79,5 @@ public class Node : MonoBehaviour
     public bool testForHardLock(){
         return false;
     }
+    */
 }
