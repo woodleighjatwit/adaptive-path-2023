@@ -17,12 +17,12 @@ public class Edge{
 public class MatrixHandler : MonoBehaviour
 {
     public static int[,] adjMatrix;
-    public static int[,] lineMatrix;
     // Start is called before the first frame update
     void Start()
-    {   
-        adjMatrix = new int[4, 4] {{0, 4, 0, 10}, {4, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
-        lineMatrix = new int[4, 4];
+    {
+        //adjMatrix = new int[4, 4] {{0, 4, 0, 10}, {4, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
+        adjMatrix = new int[6, 6] { { 0, 3, 9, 8, 5, 4 }, { 3, 0, 5, 6, 5, 0 }, { 9, 5, 0, 9, 5, 8, }, { 8, 6, 9, 0, 4, 5 }, { 5, 5, 5, 4, 0, 1 }, { 4, 0, 8, 5, 1, 0 } };
+        
     }
 
     public IEnumerator FruchtermanReingold(List<GameObject> nodeList, int maxIterations, float initialTemp, float coolingFactor, float x, float y, float z, float time){
@@ -62,6 +62,10 @@ public class MatrixHandler : MonoBehaviour
             yield return new WaitForSeconds(time/maxIterations);
 
 
+        }
+        
+        foreach(Edge e in edgeList){
+            Debug.Log(e.vert1.nodeObject.name + " and " + e.vert2.nodeObject.name + " are distance " + Vector3.Distance(e.vert1.nodeObject.transform.position, e.vert2.nodeObject.transform.position));
         }
         
 
@@ -118,13 +122,12 @@ public class MatrixHandler : MonoBehaviour
     }
 
     private float temperature(float temp, float coolingFactor, int iteration){
-        Debug.Log(temp * coolingFactor);
-
-        return temp*coolingFactor;
+       return temp*coolingFactor;
     }
 
-    IEnumerator timer(float f){
-        yield return new WaitForSeconds(f);
+    public int getSize()
+    {
+        return adjMatrix.GetLength(0);
     }
 
     private float findAverageLength(int[,] adjMatrix){

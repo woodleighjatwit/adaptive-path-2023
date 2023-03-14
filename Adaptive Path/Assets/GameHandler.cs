@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameHandler : MonoBehaviour
@@ -35,7 +36,7 @@ public class GameHandler : MonoBehaviour
         }
     }
     private void GenerateSpheres(){
-        for(int i=0; i<nodeCount; i++){
+        for(int i=0; i<matrixHandler.getSize(); i++){
             nodeObjects.Add(Instantiate(nodePrefab, generateCords(-10, 10, -10, 10, -10, 10), Quaternion.identity));
             nodeObjects[i].name = "Node " + i.ToString();
             nodeObjects[i].GetComponent<Node>().nodeIndex = i;
