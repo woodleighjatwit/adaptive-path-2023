@@ -7,7 +7,8 @@ public class GameHandler : MonoBehaviour
     public List<GameObject> nodeObjects;
     public int nodeCount;
     public GameObject nodePrefab;
-    [SerializeField] private MatrixHandler matrixHandler; 
+    [SerializeField] private MatrixHandler matrixHandler;
+    private static bool makeGraph = true;
 
     // Start is called before the first frame update
     void Start()
@@ -19,14 +20,7 @@ public class GameHandler : MonoBehaviour
          }
         
         */
-        matrixHandler.FruchtermanReingold(nodeObjects, 1000, 5.0f, 0.99f, 30f, 30f, 30f);
-        for (int i = 0; i < nodeObjects.Count - 1; i++)
-        {
-            for (int t = i + 1; t < nodeObjects.Count; t++)
-            {
-                Debug.Log("Dist" + i + " from " + t + ": " + Vector3.Distance(nodeObjects[i].transform.position, nodeObjects[t].transform.position));
-            }
-        }
+       
 
 
     }
@@ -34,7 +28,11 @@ public class GameHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (makeGraph)
+        {
+            StartCoroutine(matrixHandler.FruchtermanReingold(nodeObjects, 500, 30.0f, 0.99f, 60f, 60f, 60f, 5f));
+            makeGraph = false;
+        }
     }
     private void GenerateSpheres(){
         for(int i=0; i<nodeCount; i++){

@@ -21,11 +21,11 @@ public class MatrixHandler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {   
-        adjMatrix = new int[4, 4] {{0, 6, 0, 10}, {6, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
+        adjMatrix = new int[4, 4] {{0, 4, 0, 10}, {4, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
         lineMatrix = new int[4, 4];
     }
 
-    public void FruchtermanReingold(List<GameObject> nodeList, int maxIterations, float initialTemp, float coolingFactor, float x, float y, float z){
+    public IEnumerator FruchtermanReingold(List<GameObject> nodeList, int maxIterations, float initialTemp, float coolingFactor, float x, float y, float z, float time){
         int iteration = 1;
         float averageLength = findAverageLength(adjMatrix);
         Debug.Log("Average length: " + averageLength);
@@ -59,7 +59,9 @@ public class MatrixHandler : MonoBehaviour
             vertexPlacement(vertexList, temp, x, y, z);
             temp = temperature(temp, coolingFactor, iteration);
             iteration++;
-            
+            yield return new WaitForSeconds(time/maxIterations);
+
+
         }
         
 
@@ -82,7 +84,7 @@ public class MatrixHandler : MonoBehaviour
                     }
                     delta = vertexList[i].nodeObject.transform.position - vertexList[t].nodeObject.transform.position;
                     mag = Vector3.Magnitude(delta);
-                    vertexList[i].displacement += ((delta) / mag) * ((-k * k) / mag);
+                    vertexList[i].displacement += (delta / mag) * ((k * k) / mag);
                 }
             }
         }
@@ -100,12 +102,12 @@ public class MatrixHandler : MonoBehaviour
     }
 
     private void vertexPlacement(List<Vertex> vertexList, float temp, float x, float y, float z){
-        Vector3 pos;
+       // Vector3 pos;
         float mag;
 
         foreach(Vertex v in vertexList){
             mag = Vector3.Magnitude(v.displacement);
-            pos = v.nodeObject.transform.position + ((v.displacement / mag) * Mathf.Min(mag, temp));
+            Vector3 pos = v.nodeObject.transform.position + ((v.displacement / mag) * Mathf.Min(mag, temp));
             pos[0] = Mathf.Min(x/2, Mathf.Max(-x/2, pos[0]));
             pos[1] = Mathf.Min(y/2, Mathf.Max(-y/2, pos[1]));
             pos[2] = Mathf.Min(z/2, Mathf.Max(-z/2, pos[2]));
@@ -116,7 +118,13 @@ public class MatrixHandler : MonoBehaviour
     }
 
     private float temperature(float temp, float coolingFactor, int iteration){
-        return temp * (Mathf.Pow(coolingFactor, iteration));
+        Debug.Log(temp * coolingFactor);
+
+        return temp*coolingFactor;
+    }
+
+    IEnumerator timer(float f){
+        yield return new WaitForSeconds(f);
     }
 
     private float findAverageLength(int[,] adjMatrix){
