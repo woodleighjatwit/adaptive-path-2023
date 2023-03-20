@@ -10,18 +10,22 @@ public class GameHandler : MonoBehaviour
     public GameObject nodePrefab;
     [SerializeField] private MatrixHandler matrixHandler;
     private static bool makeGraph = true;
+    public bool isPaused = true;
 
     // Start is called before the first frame update
     void Start()
     {  
         GenerateSpheres();
+        StartCoroutine(matrixHandler.FruchtermanReingold(nodeObjects, 500, 30.0f, 0.95f, 60f, 60f, 60f, 0f));
+       
+        
         /*
          for (int i=0; i<nodeObjects.Count-1; i++){
             Debug.Log("node " + i + " pos: " + nodeObjects[i].transform.position);
          }
         
         */
-       
+
 
 
     }
@@ -31,7 +35,7 @@ public class GameHandler : MonoBehaviour
     {
         if (makeGraph)
         {
-            StartCoroutine(matrixHandler.FruchtermanReingold(nodeObjects, 500, 30.0f, 0.99f, 60f, 60f, 60f, 5f));
+            
             makeGraph = false;
         }
     }

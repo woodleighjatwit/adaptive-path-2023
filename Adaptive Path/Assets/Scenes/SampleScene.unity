@@ -167,6 +167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad96652594a6d3a458d2e37905e3455c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameHandler: {fileID: 1359566173}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -409,6 +410,7 @@ MonoBehaviour:
   nodeCount: 4
   nodePrefab: {fileID: 390026053656856390, guid: 34ed2f6c06648504ab909dfdc7e5106b, type: 3}
   matrixHandler: {fileID: 430176978}
+  isPaused: 1
 --- !u!114 &1359566175
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -421,3 +423,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad96652594a6d3a458d2e37905e3455c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameHandler: {fileID: 0}
