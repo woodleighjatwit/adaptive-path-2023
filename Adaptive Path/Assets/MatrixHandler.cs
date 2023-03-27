@@ -7,7 +7,7 @@ using System;
 public class Vertex{
     public Vector3 displacement;
     public GameObject nodeObject;
-    public int index;
+    public Vector3 position;
 }
 
 public class Edge{
@@ -23,8 +23,8 @@ public class MatrixHandler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // adjMatrix = new int[4, 4] {{0, 4, 0, 10}, {4, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
-        adjMatrix = new int[6, 6] { { 0, 6, 18, 16, 10, 8 }, { 6, 0, 10, 12, 10, 0 }, { 18, 10, 0, 18, 10, 16 }, { 16, 12, 18, 0, 8, 10 }, { 10, 10, 10, 8, 0, 2 }, { 8, 0, 16, 10, 2, 0 } };
+        adjMatrix = new int[4, 4] {{0, 4, 0, 10}, {4, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
+        //adjMatrix = new int[6, 6] { { 0, 6, 18, 16, 10, 8 }, { 6, 0, 10, 12, 10, 0 }, { 18, 10, 0, 18, 10, 16 }, { 16, 12, 18, 0, 8, 8 }, { 10, 10, 10, 8, 0, 2 }, { 8, 0, 16, 8, 2, 0 } };
         
     }
 
@@ -33,8 +33,8 @@ public class MatrixHandler : MonoBehaviour
         float averageLength = findAverageLength(adjMatrix);
         Debug.Log("Average length: " + averageLength);
         float temp;
-        float newCost = 0;
-        float oldCost = 0;
+        float newError = 0;
+        float oldError = 0;
 
 
         List<Vertex> vertexList = new List<Vertex>();
@@ -44,7 +44,6 @@ public class MatrixHandler : MonoBehaviour
         for(int i=0; i<nodeList.Count; i++){
             Vertex v = new Vertex();
             v.nodeObject = nodeList[i];
-            v.index = i;
             vertexList.Add(v);
         }
 
@@ -61,17 +60,18 @@ public class MatrixHandler : MonoBehaviour
             }
         }
 
-        temp = findCost(adjMatrix, edgeList);
+        temp = findError(edgeList);
 
         while (iteration < maxIterations && temp > 0.00001){
             repulsiveForce(vertexList, adjMatrix, averageLength);   // compute repulsive forces 
             attractiveForce(edgeList); // compute attractive forces 
             vertexPlacement(vertexList, temp, x, y, z); // add displacement to vertices 
-            oldCost = newCost;
-            newCost = findCost(adjMatrix, edgeList); // find current cost/energy of system
+            oldError = newError;
+             
             
             if ( iteration != 1){
-                temp = simulatedAnnealing(temp, coolingFactor, newCost, oldCost);  // add cooling to temperature 
+                newError = findError(edgeList); // find current cost/energy of system
+                temp = simulatedAnnealing(temp, coolingFactor, newError - oldError, vertexList);  // add cooling to temperature 
             }
             iteration++;
             yield return new WaitForSeconds(time/maxIterations); // add delay for animation 
@@ -83,7 +83,7 @@ public class MatrixHandler : MonoBehaviour
         foreach(Edge e in edgeList){
             Debug.Log(e.vert1.nodeObject.name + " and " + e.vert2.nodeObject.name + " are distance " + Vector3.Distance(e.vert1.nodeObject.transform.position, e.vert2.nodeObject.transform.position));
         }
-        Debug.Log(findCost(adjMatrix, edgeList));
+        Debug.Log(findError(edgeList));
 
 
     }
@@ -104,23 +104,23 @@ public class MatrixHandler : MonoBehaviour
                     mag = Vector3.Magnitude(delta);
                     // get length to use
                     if (adjMatrix[i, t] == 0){
-                        
+
+                        k = 0;
+
+                        /*
                         if (Mathf.Abs(mag) > averageLength){
                             k = 0;
                         }
                         else{
                             k = averageLength;
-                        }                       
+                        }
+                       */
                     }
                     else{
                         k = adjMatrix[i, t];
 
                     }
-                    
                     vertexList[i].displacement += (delta / mag) * ((k * k) / mag);  // equation used by FR to determine repuslive force
-
-
-
 
                 }
             }
@@ -157,25 +157,25 @@ public class MatrixHandler : MonoBehaviour
             pos[1] = Mathf.Min(y/2, Mathf.Max(-y/2, pos[1]));
             pos[2] = Mathf.Min(z/2, Mathf.Max(-z/2, pos[2]));
             
-            v.nodeObject.transform.position = pos; 
+            v.position = pos; 
             
         }
     }
 
     // Calculates new room temperature with cooling factor. Used function because there are different variants of cooling functions
-    private float simulatedAnnealing(float temp, float coolingFactor, float newCost, float oldCost){
-        return temp * coolingFactor;
-        float delta = newCost - oldCost;
-        float prob = Mathf.Exp(-(delta / temp));
-        float rand = UnityEngine.Random.Range(0f, 1f);
-        if (delta <= 0){
+    private float simulatedAnnealing(float temp, float coolingFactor, float deltaError, List<Vertex> vertexList){
+
+        if (deltaError < 0){
+            setPosition(vertexList);
             return temp * coolingFactor;
         }
-        else if(prob > rand){
+        else if(Mathf.Exp(deltaError / temp) > UnityEngine.Random.Range(0f, 1f))
+        {
+            setPosition(vertexList);
             return temp * coolingFactor;
         }
         else{
-            return temp + 2*(temp * (1 - coolingFactor));
+            return temp;
         }
        
     }
@@ -202,11 +202,19 @@ public class MatrixHandler : MonoBehaviour
         return length/(num);
     }
 
-    public float findCost(int[,] adjMatrix, List<Edge> edgeList){
-        float cost = 0;
+    public float findError(List<Edge> edgeList){
+        float error = 0;
         foreach (Edge e in edgeList) {
-            cost += Mathf.Abs(Vector3.Distance(e.vert1.nodeObject.transform.position, e.vert2.nodeObject.transform.position) - adjMatrix[e.vert1.index, e.vert2.index]);
+            error += Math.Abs(Vector3.Distance(e.vert1.nodeObject.transform.position, e.vert2.nodeObject.transform.position) - e.length);
         }
-        return cost;
+        return error;
+    }
+
+    public void setPosition(List<Vertex> vertexList)
+    {
+        foreach(Vertex v in vertexList) {
+            v.nodeObject.transform.position = v.position;
+
+        }
     }
 }
