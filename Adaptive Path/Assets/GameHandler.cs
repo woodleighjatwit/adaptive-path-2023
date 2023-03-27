@@ -16,7 +16,7 @@ public class GameHandler : MonoBehaviour
     void Start()
     {  
         GenerateSpheres();
-        StartCoroutine(matrixHandler.FruchtermanReingold(nodeObjects, 1200, 30.0f, 0.99f, 60f, 60f, 60f, 0f));
+        StartCoroutine(matrixHandler.FruchtermanReingold(nodeObjects, 1200, 30.0f, 0.95f, 60f, 60f, 60f, 0f));
        
         
         /*
