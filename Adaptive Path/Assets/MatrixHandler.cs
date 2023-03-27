@@ -1,35 +1,212 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+using System;
+
+public class Vertex{
+    public Vector3 displacement;
+    public GameObject nodeObject;
+    public int index;
+}
+
+public class Edge{
+    public Vertex vert1;
+    public Vertex vert2;
+    public int length;
+}
 
 public class MatrixHandler : MonoBehaviour
 {
-    public static int[,] connectionMatrix;
-    public static int[,] lineMatrix;
+    public static int[,] adjMatrix;
+    [SerializeField] private GameHandler gameHandler;
     // Start is called before the first frame update
     void Start()
-    {   
-        connectionMatrix = new int[4, 4] {{0, 1, 0, 1}, {1, 0, 1, 0}, {0, 1, 0, 1}, {1, 0, 1, 0}};
-        lineMatrix = new int[4, 4];
-    }
-
-    // Update is called once per frame
-    void Update()
     {
+        // adjMatrix = new int[4, 4] {{0, 4, 0, 10}, {4, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
+        adjMatrix = new int[6, 6] { { 0, 6, 18, 16, 10, 8 }, { 6, 0, 10, 12, 10, 0 }, { 18, 10, 0, 18, 10, 16 }, { 16, 12, 18, 0, 8, 10 }, { 10, 10, 10, 8, 0, 2 }, { 8, 0, 16, 10, 2, 0 } };
         
     }
 
-    public static bool checkConnection(int s1, int s2){
-        return connectionMatrix[s1, s2] == 1;
+    public IEnumerator FruchtermanReingold(List<GameObject> nodeList, int maxIterations, float initialTemp, float coolingFactor, float x, float y, float z, float time){
+        int iteration = 1;
+        float averageLength = findAverageLength(adjMatrix);
+        Debug.Log("Average length: " + averageLength);
+        float temp;
+        float newCost = 0;
+        float oldCost = 0;
+
+
+        List<Vertex> vertexList = new List<Vertex>();
+        List<Edge> edgeList = new List<Edge>();
+
+        // creates a list of all vertices 
+        for(int i=0; i<nodeList.Count; i++){
+            Vertex v = new Vertex();
+            v.nodeObject = nodeList[i];
+            v.index = i;
+            vertexList.Add(v);
+        }
+
+        // create a list of all edges
+        for (int i=0; i<adjMatrix.GetLength(0)-1; i++){
+            for (int t=i+1; t<adjMatrix.GetLength(1); t++){
+                if(adjMatrix[i, t] != 0 && i < t){
+                    Edge e = new Edge();
+                    e.vert1 = vertexList[i];
+                    e.vert2 = vertexList[t];
+                    e.length = adjMatrix[i, t];
+                    edgeList.Add(e);
+                }               
+            }
+        }
+
+        temp = findCost(adjMatrix, edgeList);
+
+        while (iteration < maxIterations && temp > 0.00001){
+            repulsiveForce(vertexList, adjMatrix, averageLength);   // compute repulsive forces 
+            attractiveForce(edgeList); // compute attractive forces 
+            vertexPlacement(vertexList, temp, x, y, z); // add displacement to vertices 
+            oldCost = newCost;
+            newCost = findCost(adjMatrix, edgeList); // find current cost/energy of system
+            
+            if ( iteration != 1){
+                temp = simulatedAnnealing(temp, coolingFactor, newCost, oldCost);  // add cooling to temperature 
+            }
+            iteration++;
+            yield return new WaitForSeconds(time/maxIterations); // add delay for animation 
+
+
+        }
+        
+        // displace distance 
+        foreach(Edge e in edgeList){
+            Debug.Log(e.vert1.nodeObject.name + " and " + e.vert2.nodeObject.name + " are distance " + Vector3.Distance(e.vert1.nodeObject.transform.position, e.vert2.nodeObject.transform.position));
+        }
+        Debug.Log(findCost(adjMatrix, edgeList));
+
+
     }
 
-    public static void createConnection(int s1, int s2){
-        lineMatrix[s1, s2] = 1;
-        lineMatrix[s2, s1] = 1;
+    // Calculates a repulsive force on every node base on their distance from every other node.
+    private void repulsiveForce(List<Vertex> vertexList, int[,] adjMatrix, float averageLength){
+        Vector3 delta;
+        float k;
+        float mag;
+        for(int i=0; i<vertexList.Count; i++){
+
+            // since repulsive force is caculated first reset all vertex displacement values
+            vertexList[i].displacement = new Vector3(0, 0 ,0);
+            
+            for(int t=0; t<vertexList.Count; t++){
+                if (i != t){
+                    delta = vertexList[i].nodeObject.transform.position - vertexList[t].nodeObject.transform.position; // change in position between  i and t vertex
+                    mag = Vector3.Magnitude(delta);
+                    // get length to use
+                    if (adjMatrix[i, t] == 0){
+                        
+                        if (Mathf.Abs(mag) > averageLength){
+                            k = 0;
+                        }
+                        else{
+                            k = averageLength;
+                        }                       
+                    }
+                    else{
+                        k = adjMatrix[i, t];
+
+                    }
+                    
+                    vertexList[i].displacement += (delta / mag) * ((k * k) / mag);  // equation used by FR to determine repuslive force
+
+
+
+
+                }
+            }
+        }
     }
 
-    public static void removeConnection(int s1, int s2){
-        lineMatrix[s1, s2] = 0;
-        lineMatrix[s2, s1] = 0;
+    // Calculates an attractive force on every vertice pair (edges) that pulls them together.
+    private void attractiveForce(List<Edge> edgeList){
+        Vector3 delta;
+        float mag;
+
+        for(int i=0; i<edgeList.Count; i++){
+            delta = edgeList[i].vert1.nodeObject.transform.position - edgeList[i].vert2.nodeObject.transform.position;  // change vector 
+            mag = Vector3.Magnitude(delta); 
+
+            // FRs two equations 
+            edgeList[i].vert1.displacement += -(delta / mag) * ((mag * mag) / edgeList[i].length);
+            edgeList[i].vert2.displacement += (delta / mag) * ((mag * mag) / edgeList[i].length);
+        }
+    }
+
+    // Uses displacement/calculated forces to displace vertices 
+    private void vertexPlacement(List<Vertex> vertexList, float temp, float x, float y, float z){
+        float mag;
+
+        foreach(Vertex v in vertexList){
+            mag = Vector3.Magnitude(v.displacement);
+
+            //limits change based with temp
+            Vector3 pos = v.nodeObject.transform.position + ((v.displacement / mag) * Mathf.Min(mag, temp)); // FR equation
+
+            // limiting change to within +/- x/2, y/2, z/2 distance (or within frame)
+            pos[0] = Mathf.Min(x/2, Mathf.Max(-x/2, pos[0]));
+            pos[1] = Mathf.Min(y/2, Mathf.Max(-y/2, pos[1]));
+            pos[2] = Mathf.Min(z/2, Mathf.Max(-z/2, pos[2]));
+            
+            v.nodeObject.transform.position = pos; 
+            
+        }
+    }
+
+    // Calculates new room temperature with cooling factor. Used function because there are different variants of cooling functions
+    private float simulatedAnnealing(float temp, float coolingFactor, float newCost, float oldCost){
+        return temp * coolingFactor;
+        float delta = newCost - oldCost;
+        float prob = Mathf.Exp(-(delta / temp));
+        float rand = UnityEngine.Random.Range(0f, 1f);
+        if (delta <= 0){
+            return temp * coolingFactor;
+        }
+        else if(prob > rand){
+            return temp * coolingFactor;
+        }
+        else{
+            return temp + 2*(temp * (1 - coolingFactor));
+        }
+       
+    }
+    // keep track of change between two iterations 
+    // minimize change and lower temp if being minimized, raise temp if not
+    // find to a certain degree of accuracy or max iterations to account for impossible placement 
+    //
+    public int getSize()
+    {
+        return adjMatrix.GetLength(0);
+    }
+
+    private float findAverageLength(int[,] adjMatrix){
+        float length = 0;
+        int num = 0;
+        for (int i=0; i<adjMatrix.GetLength(0); i++){
+            for (int t=0; t<adjMatrix.GetLength(1); t++){
+                if (adjMatrix[i, t] != 0){
+                    length += adjMatrix[i, t];
+                    num++;
+                }
+            }
+        }
+        return length/(num);
+    }
+
+    public float findCost(int[,] adjMatrix, List<Edge> edgeList){
+        float cost = 0;
+        foreach (Edge e in edgeList) {
+            cost += Mathf.Abs(Vector3.Distance(e.vert1.nodeObject.transform.position, e.vert2.nodeObject.transform.position) - adjMatrix[e.vert1.index, e.vert2.index]);
+        }
+        return cost;
     }
 }
