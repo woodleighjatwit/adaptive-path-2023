@@ -18,14 +18,16 @@ public class Edge{
 
 public class MatrixHandler : MonoBehaviour
 {
-    public static int[,] adjMatrix;
+    public int[,] adjMatrix;
+    public int[,] actualMatrix; 
     [SerializeField] private GameHandler gameHandler;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        adjMatrix = new int[4, 4] {{0, 4, 0, 10}, {4, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
-        //adjMatrix = new int[6, 6] { { 0, 6, 18, 16, 10, 8 }, { 6, 0, 10, 12, 10, 0 }, { 18, 10, 0, 18, 10, 16 }, { 16, 12, 18, 0, 8, 8 }, { 10, 10, 10, 8, 0, 2 }, { 8, 0, 16, 8, 2, 0 } };
+        //adjMatrix = new int[4, 4] {{0, 4, 0, 10}, {4, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
+        adjMatrix = new int[6, 6] { { 0, 6, 18, 16, 10, 8 }, { 6, 0, 10, 12, 10, 0 }, { 18, 10, 0, 18, 10, 16 }, { 16, 12, 18, 0, 8, 8 }, { 10, 10, 10, 8, 0, 2 }, { 8, 0, 16, 8, 2, 0 } };
         
+
     }
 
     public IEnumerator FruchtermanReingold(List<GameObject> nodeList, int maxIterations, float initialTemp, float coolingFactor, float x, float y, float z, float time){
@@ -105,14 +107,15 @@ public class MatrixHandler : MonoBehaviour
                     // get length to use
                     if (adjMatrix[i, t] == 0){
 
-                        
+                        /*
                         if (Mathf.Abs(mag) > averageLength){
                             k = 0;
                         }
                         else{
                             k = averageLength;
                         }
-                       
+                        */
+                        k = averageLength*3*(1/mag);
                     }
                     else{
                         k = adjMatrix[i, t];

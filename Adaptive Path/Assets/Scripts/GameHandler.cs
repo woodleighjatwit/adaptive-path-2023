@@ -9,14 +9,16 @@ public class GameHandler : MonoBehaviour
     public int nodeCount;
     public GameObject nodePrefab;
     [SerializeField] private MatrixHandler matrixHandler;
+    [SerializeField] private Drawer drawer;
     private static bool makeGraph = true;
     public bool isPaused = true;
 
     // Start is called before the first frame update
-    void Start()
+    IEnumerator Start()
     {  
         GenerateSpheres();
-        StartCoroutine(matrixHandler.FruchtermanReingold(nodeObjects, 1200, 30.0f, 0.95f, 60f, 60f, 60f, 0f));
+        yield return StartCoroutine(matrixHandler.FruchtermanReingold(nodeObjects, 1200, 30.0f, 0.95f, 60f, 60f, 60f, 0f));
+        drawer.drawConnectionLines();
         isPaused = false;
         
         /*
