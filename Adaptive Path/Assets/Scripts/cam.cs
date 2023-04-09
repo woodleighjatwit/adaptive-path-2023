@@ -32,18 +32,17 @@ public class cam : MonoBehaviour {
 
     void Update()
     {
-        if (!gameHandler.isPaused)
-        {
-            // Input
-            if (Focused)
-                UpdateInput();
-            else if (Input.GetMouseButtonDown(1))
-                Focused = true;
+       
+        // Input
+        if (Focused)
+            UpdateInput();
+        else if (Input.GetMouseButtonDown(1))
+            Focused = true;
 
-            // Physics
-            velocity = Vector3.Lerp(velocity, Vector3.zero, dampingCoefficient * Time.deltaTime);
-            transform.position += velocity * Time.deltaTime;
-        }
+        // Physics
+        velocity = Vector3.Lerp(velocity, Vector3.zero, dampingCoefficient * Time.deltaTime);
+        transform.position += velocity * Time.deltaTime;
+        
     }
 
     void UpdateInput()

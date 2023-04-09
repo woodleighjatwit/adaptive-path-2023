@@ -32,40 +32,47 @@ public class Drawer : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-        // if left mouse click down
-        if (Input.GetMouseButtonDown(0))
+        if (!gameHandler.isPaused)
         {
-            firstObject = MouseOverObject();
-            Debug.Log(firstObject);
 
-        }
-        // if left mouse click up
-        else if (Input.GetMouseButtonUp(0))
-        {
-            firstObject = null;
-            secondObject = null;
-            Debug.Log(firstObject);
-            Debug.Log(secondObject);
 
-        }
-        // if drag
-        if (Input.GetMouseButton(0))
-        {
-            if (firstObject)
+            // if left mouse click down
+            if (Input.GetMouseButtonDown(0))
             {
-                secondObject = MouseOverObject();
-                if (secondObject && secondObject != firstObject)
+                firstObject = MouseOverObject();
+
+            }
+            // if left mouse click up
+            else if (Input.GetMouseButtonUp(0))
+            {
+                firstObject = null;
+                secondObject = null;
+
+            }
+            // if drag
+            if (Input.GetMouseButton(0))
+            {
+                if (firstObject)
                 {
-                    drawTestLine(firstObject, secondObject);
-                    firstObject = secondObject;
-                    secondObject = null;
-                    Debug.Log(firstObject);
-                    Debug.Log(secondObject);
+                    secondObject = MouseOverObject();
+
+                    if (secondObject && secondObject != firstObject && firstObject.GetComponent<Node>().active)
+                    {
+                        drawTestLine(firstObject, secondObject);
+                        secondObject.gameObject.GetComponent<Node>().toggleCore(true);
+                        if (secondObject.GetComponent<Node>().isEndCore)
+                        {
+                            gameHandler.checkGameFinish();
+                        }
+                        firstObject = secondObject;
+                        secondObject = null;
+
+
+                    }
 
                 }
 
             }
-
         }
 
     }
@@ -92,12 +99,15 @@ public class Drawer : MonoBehaviour {
         lineRender.startWidth = lineWidth;
         lineRender.endWidth = lineWidth;
         lineRender.material = lineMat;
-        
         lineRender.positionCount = 2;
         lineRender.SetPositions(new Vector3[] { s1.transform.position, s2.transform.position });
 
-
+        gameHandler.lineObjects.Add(newLine);
     }
+
+
+
+
     public void drawConnectionLines()
     {
         int[,] adjMatrix = matrixHandler.adjMatrix;

@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 056126c776d1c484f8d80b6a6804398f, type: 2}
+  - {fileID: 2100000, guid: 678d3bf53e07b594aa5b96df8640b071, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -211,3 +211,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   position: {x: 0, y: 0, z: 0}
   nodeIndex: 0
+  onMat: {fileID: 2100000, guid: 056126c776d1c484f8d80b6a6804398f, type: 2}
+  offMat: {fileID: 2100000, guid: 678d3bf53e07b594aa5b96df8640b071, type: 2}
+  endCore: {fileID: 2100000, guid: d52d14f0fdeeb8e42808111e3bb824c6, type: 2}
+  core: {fileID: 1459782843}
