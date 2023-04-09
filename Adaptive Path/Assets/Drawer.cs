@@ -16,6 +16,7 @@ public class Drawer : MonoBehaviour {
     [SerializeField] private MatrixHandler matrixHandler;
     [SerializeField] private GameHandler gameHandler;
     [SerializeField] private Material lineMat;
+    public GameObject selectedNode;
     public class Line
     {
         Vector3 pos1;
@@ -49,22 +50,31 @@ public class Drawer : MonoBehaviour {
                 secondObject = null;
 
             }
+
             // if drag
             if (Input.GetMouseButton(0))
             {
-                if (firstObject)
+                if (firstObject.Equals(selectedNode))
                 {
                     secondObject = MouseOverObject();
 
                     if (secondObject && secondObject != firstObject && firstObject.GetComponent<Node>().active)
                     {
                         drawTestLine(firstObject, secondObject);
-                        secondObject.gameObject.GetComponent<Node>().toggleCore(true);
-                        if (secondObject.GetComponent<Node>().isEndCore)
+                        if (secondObject.gameObject.GetComponent<Node>().active)
                         {
-                            gameHandler.checkGameFinish();
+                            gameHandler.failedEnd();
                         }
+                        else
+                        {
+                            secondObject.gameObject.GetComponent<Node>().toggleCore(true);
+                            if (secondObject.GetComponent<Node>().isEndCore)
+                            {
+                                gameHandler.checkGameFinish();
+                            }
+                        }        
                         firstObject = secondObject;
+                        selectedNode = secondObject;
                         secondObject = null;
 
 

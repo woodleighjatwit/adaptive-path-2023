@@ -24,8 +24,11 @@ public class MatrixHandler : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        //adjMatrix = new int[4, 4] {{0, 4, 0, 10}, {4, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
-        adjMatrix = new int[6, 6] { { 0, 6, 18, 16, 10, 8 }, { 6, 0, 10, 12, 10, 0 }, { 18, 10, 0, 18, 10, 16 }, { 16, 12, 18, 0, 8, 8 }, { 10, 10, 10, 8, 0, 2 }, { 8, 0, 16, 8, 2, 0 } };
+        // numbers represent length between nodes 
+        // row/col are otherway common representation of adjacency matrices 
+
+        adjMatrix = new int[4, 4] {{0, 4, 0, 10}, {4, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
+        //adjMatrix = new int[6, 6] { { 0, 6, 18, 16, 10, 8 }, { 6, 0, 10, 12, 10, 0 }, { 18, 10, 0, 18, 10, 16 }, { 16, 12, 18, 0, 8, 8 }, { 10, 10, 10, 8, 0, 2 }, { 8, 0, 16, 8, 2, 0 } };
         
 
     }

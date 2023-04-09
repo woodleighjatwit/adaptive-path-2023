@@ -15,23 +15,22 @@ public class GameHandler : MonoBehaviour
     public bool isPaused = true;
     [SerializeField] private Material failLineMat;
 
-    // Start is called before the first frame update
+
     IEnumerator Start()
-    {  
-        GenerateSpheres();
-        yield return StartCoroutine(matrixHandler.FruchtermanReingold(nodeObjects, 1200, 30.0f, 0.95f, 60f, 60f, 60f, 0f));
+    {
+        GenerateNodes();
+        yield return StartCoroutine(matrixHandler.FruchtermanReingold(nodeObjects, 1200, 30.0f, 0.95f, 60f, 60f, 60f, 5f));
         drawer.drawConnectionLines();
+        drawer.selectedNode = nodeObjects[0];
         nodeObjects[0].GetComponent<Node>().toggleCore(true);
         nodeObjects[nodeObjects.Count-1].GetComponent<Node>().setEndCore();
-
         isPaused = false;
    
 
     }
 
-    // Update is called once per frame
 
-    private void GenerateSpheres(){
+    private void GenerateNodes(){
         for(int i=0; i<matrixHandler.getSize(); i++){
             nodeObjects.Add(Instantiate(nodePrefab, generateCords(-10, 10, -10, 10, -10, 10), Quaternion.identity));
             nodeObjects[i].name = "Node " + i.ToString();
@@ -57,6 +56,10 @@ public class GameHandler : MonoBehaviour
                 break;
             }
         }
+        isPaused = true;
+        
+
+
     }
     
     public void failedEnd()
