@@ -11,24 +11,30 @@ public class GameHandler : MonoBehaviour
     public GameObject nodePrefab;
     [SerializeField] private MatrixHandler matrixHandler;
     [SerializeField] private Drawer drawer;
-    private static bool makeGraph = true;
     public bool isPaused = true;
     [SerializeField] private Material failLineMat;
+    public static bool gameOver = false;
 
 
     IEnumerator Start()
     {
         GenerateNodes();
         yield return StartCoroutine(matrixHandler.FruchtermanReingold(nodeObjects, 1200, 30.0f, 0.95f, 60f, 60f, 60f, 5f));
+        yield return StartCoroutine(matrixHandler.centerNodes(nodeObjects));
         drawer.drawConnectionLines();
         drawer.selectedNode = nodeObjects[0];
         nodeObjects[0].GetComponent<Node>().toggleCore(true);
         nodeObjects[nodeObjects.Count-1].GetComponent<Node>().setEndCore();
+
         isPaused = false;
    
 
     }
 
+    private void Update()
+    {
+        
+    }
 
     private void GenerateNodes(){
         for(int i=0; i<matrixHandler.getSize(); i++){
@@ -49,6 +55,7 @@ public class GameHandler : MonoBehaviour
 
     public void checkGameFinish()
     {
+
         for(int i=0; i<nodeObjects.Count; i++)
         {
             if (!nodeObjects[i].GetComponent<Node>().active ) {
@@ -57,6 +64,8 @@ public class GameHandler : MonoBehaviour
             }
         }
         isPaused = true;
+        
+        StartCoroutine(matrixHandler.moveNodesToCenter(nodeObjects));
         
 
 
@@ -74,5 +83,8 @@ public class GameHandler : MonoBehaviour
             lineObjects[i].GetComponent<LineRenderer>().material = failLineMat;
         }
         isPaused = true;
+        
     }
+
+    
 }

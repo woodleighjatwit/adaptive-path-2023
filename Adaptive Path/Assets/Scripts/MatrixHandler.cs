@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
+using UnityEditor.Experimental.GraphView;
 
 public class Vertex{
     public Vector3 displacement;
@@ -27,8 +28,8 @@ public class MatrixHandler : MonoBehaviour
         // numbers represent length between nodes 
         // row/col are otherway common representation of adjacency matrices 
 
-        adjMatrix = new int[4, 4] {{0, 4, 0, 10}, {4, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
-        //adjMatrix = new int[6, 6] { { 0, 6, 18, 16, 10, 8 }, { 6, 0, 10, 12, 10, 0 }, { 18, 10, 0, 18, 10, 16 }, { 16, 12, 18, 0, 8, 8 }, { 10, 10, 10, 8, 0, 2 }, { 8, 0, 16, 8, 2, 0 } };
+        //adjMatrix = new int[4, 4] {{0, 4, 0, 10}, {4, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
+        adjMatrix = new int[6, 6] { { 0, 6, 18, 16, 10, 8 }, { 6, 0, 10, 12, 10, 0 }, { 18, 10, 0, 18, 10, 16 }, { 16, 12, 18, 0, 8, 8 }, { 10, 10, 10, 8, 0, 2 }, { 8, 0, 16, 8, 2, 0 } };
         
 
     }
@@ -89,6 +90,9 @@ public class MatrixHandler : MonoBehaviour
             Debug.Log(e.vert1.nodeObject.name + " and " + e.vert2.nodeObject.name + " are distance " + Vector3.Distance(e.vert1.nodeObject.transform.position, e.vert2.nodeObject.transform.position));
         }
         Debug.Log(findError(edgeList));
+
+
+
 
 
     }
@@ -218,6 +222,68 @@ public class MatrixHandler : MonoBehaviour
     {
         foreach(Vertex v in vertexList) {
             v.nodeObject.transform.position = v.position;
+
+        }
+    }
+
+    public IEnumerator centerNodes(List<GameObject> nodeList)
+    {
+        Debug.Log("STARTING");
+        Vector3 avgVector = new Vector3(0, 0, 0);
+        foreach(GameObject node in nodeList)
+        {
+            avgVector += node.transform.position;
+
+        }
+        avgVector = avgVector / nodeList.Count;
+
+        Debug.Log(avgVector);
+        for (int i=0; i<100; i++)
+        {
+
+            foreach (GameObject node in nodeList)
+            {
+                node.transform.position += (Vector3.zero - avgVector) / 100;
+            }
+
+            yield return new WaitForSeconds(0.001f);
+
+
+
+        }
+
+        
+    }
+
+    public IEnumerator moveNodesToCenter(List<GameObject> nodeList)
+    {
+        yield return new WaitForSeconds(1);
+        for (int i = 0; i < gameHandler.lineObjects.Count; i++)
+        {
+            Destroy(gameHandler.lineObjects[i]);
+        }
+        List<GameObject> nodes = nodeList;
+        List<Vector3> pos = new List<Vector3>(); 
+        foreach(GameObject node in nodeList )
+        {
+            pos.Add(node.transform.position);
+        }
+        for (int i=0; i<101; i++)
+        {
+            if (i != 0)
+            { 
+                for (int j=0; j <nodes.Count;j++)
+                {
+
+                    nodeList[j].transform.localScale += new Vector3(0.005f, 0.005f, 0.005f);
+                    nodeList[j].transform.position -= (pos[j] / 100);
+
+
+                }
+
+            }
+
+            yield return new WaitForSeconds(0.001f);
 
         }
     }
