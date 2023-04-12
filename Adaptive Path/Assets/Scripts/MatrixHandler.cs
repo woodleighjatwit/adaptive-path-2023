@@ -33,6 +33,41 @@ public class MatrixHandler : MonoBehaviour
         
 
     }
+    //converts txt file into adjacency matrix
+    public int[][] converter(int lower, int upper, string level, string layout){
+       int [][] adj =  new int[upper-lower][upper - lower];
+       //store textfile in string
+       string textFile = String.Format("Assets\\Layouts\\{0}\\{1}\\",level,layout);
+       //iterate through file
+       foreach(string line in File.ReadLine(textFile)){
+            char[] s = line.Split(",");
+            if(CheckThree(s) == true){
+                int[] arr = CharToInt(s);
+                if(lower <= arr[0] <= upper && lower <= arr[1] <= upper){
+                    if(arr[0] != arr[1]);
+                    adj[arr[0]][arr[1]] = arr[2];
+                }
+            }
+            return adj;
+       }
+
+    }
+    //checks if line has three characters
+    private bool CheckThree(char[] s){
+        if(s.Length == 3){
+            return true;
+        }
+        return false;
+
+    }
+    //convert char array to int array
+    private int[] CharToInt(char[] arr){
+        int[] arr2 = new int[arr.Length];
+        for(int i = 0; i < arr2.Length; i++){
+            arr2[i] = (int)arr[i];
+        }
+        return arr2;
+    }
 
     public IEnumerator FruchtermanReingold(List<GameObject> nodeList, int maxIterations, float initialTemp, float coolingFactor, float x, float y, float z, float time){
         int iteration = 1;
