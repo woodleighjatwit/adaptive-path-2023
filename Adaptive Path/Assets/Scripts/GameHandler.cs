@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
+
+
 public class GameHandler : MonoBehaviour
 {   
     public List<GameObject> nodeObjects;
-    public List<GameObject> lineObjects;
+    public List<Line> lines = new List<Line>();
     public int nodeCount;
     public GameObject nodePrefab;
     [SerializeField] private MatrixHandler matrixHandler;
@@ -15,7 +17,7 @@ public class GameHandler : MonoBehaviour
     [SerializeField] private Material failLineMat;
     public static bool gameOver = false;
 
-
+    
     IEnumerator Start()
     {
         GenerateNodes();
@@ -78,9 +80,13 @@ public class GameHandler : MonoBehaviour
             nodeObjects[i].GetComponent<Node>().setEndCore();
         }
 
-        for (int i = 0; i < lineObjects.Count; i++)
+        for (int i = 0; i < lines.Count; i++)
         {
-            lineObjects[i].GetComponent<LineRenderer>().material = failLineMat;
+            if (lines[i].drawnLine != null)
+            {
+                lines[i].drawnLine.GetComponent<LineRenderer>().material = failLineMat;
+            }
+            
         }
         isPaused = true;
         

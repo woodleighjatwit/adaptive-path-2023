@@ -4,6 +4,8 @@ using UnityEngine;
 using System.Linq;
 using System;
 using UnityEditor.Experimental.GraphView;
+using UnityEngine.Rendering.Universal;
+using System.Runtime.ExceptionServices;
 
 public class Vertex{
     public Vector3 displacement;
@@ -30,10 +32,10 @@ public class MatrixHandler : MonoBehaviour
 
         //adjMatrix = new int[4, 4] {{0, 4, 0, 10}, {4, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
         adjMatrix = new int[6, 6] { { 0, 6, 18, 16, 10, 8 }, { 6, 0, 10, 12, 10, 0 }, { 18, 10, 0, 18, 10, 16 }, { 16, 12, 18, 0, 8, 8 }, { 10, 10, 10, 8, 0, 2 }, { 8, 0, 16, 8, 2, 0 } };
+
         
-
     }
-
+   
     public IEnumerator FruchtermanReingold(List<GameObject> nodeList, int maxIterations, float initialTemp, float coolingFactor, float x, float y, float z, float time){
         int iteration = 1;
         float averageLength = findAverageLength(adjMatrix);
@@ -226,9 +228,9 @@ public class MatrixHandler : MonoBehaviour
         }
     }
 
+
     public IEnumerator centerNodes(List<GameObject> nodeList)
     {
-        Debug.Log("STARTING");
         Vector3 avgVector = new Vector3(0, 0, 0);
         foreach(GameObject node in nodeList)
         {
@@ -257,11 +259,18 @@ public class MatrixHandler : MonoBehaviour
 
     public IEnumerator moveNodesToCenter(List<GameObject> nodeList)
     {
-        yield return new WaitForSeconds(1);
-        for (int i = 0; i < gameHandler.lineObjects.Count; i++)
+        for (int i = 0; i < gameHandler.lines.Count; i++)
         {
-            Destroy(gameHandler.lineObjects[i]);
+            gameHandler.lines[i].destroyDirectionLine();
+
         }
+        yield return new WaitForSeconds(1);
+        for (int i = 0; i < gameHandler.lines.Count; i++)
+        {
+            gameHandler.lines[i].destroyDrawnLine();
+
+        }
+
         List<GameObject> nodes = nodeList;
         List<Vector3> pos = new List<Vector3>(); 
         foreach(GameObject node in nodeList )

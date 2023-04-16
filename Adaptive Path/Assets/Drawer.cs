@@ -1,13 +1,48 @@
+using Palmmedia.ReportGenerator.Core.Reporting.Builders;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+
+public class Line : MonoBehaviour
+{
+    public GameObject node1;
+    public GameObject node2;
+    public int nodeIndex1;
+    public int nodeIndex2;
+    public List<GameObject> directionLines;
+    public GameObject drawnLine;
+
+    public void destroyDirectionLine()
+    {
+        if(directionLines.Count > 0)
+        {
+            foreach (GameObject l in directionLines)
+            {
+                
+                Destroy(l);
+            }
+        }        
+        
+    }
+    public void destroyDrawnLine()
+    {
+        if (drawnLine != null)
+        {
+            Destroy(drawnLine);
+        }
+    }
+
+    
+}
 
 public class Drawer : MonoBehaviour { 
 
     // Start is called before the first frame update
     private RaycastHit hit;
     private GameObject newLine;
-    private LineRenderer lineRender;
+    private LineRenderer lineRenderer;
     private GameObject firstObject;
     private GameObject secondObject;
     public float timerDelay;
@@ -17,12 +52,9 @@ public class Drawer : MonoBehaviour {
     [SerializeField] private GameHandler gameHandler;
     [SerializeField] private Material lineMat;
     public GameObject selectedNode;
-    public class Line
-    {
-        Vector3 pos1;
-        Vector3 pos2;
-
-    }
+    public Texture lineTexture;
+    
+    
     
     
     void Start()
@@ -41,6 +73,10 @@ public class Drawer : MonoBehaviour {
             if (Input.GetMouseButtonDown(0))
             {
                 firstObject = MouseOverObject();
+                if (firstObject.tag != "Node")
+                {
+                    firstObject = null;
+                }
 
             }
             // if left mouse click up
@@ -54,30 +90,39 @@ public class Drawer : MonoBehaviour {
             // if drag
             if (Input.GetMouseButton(0))
             {
-                if (firstObject.Equals(selectedNode))
+                if (firstObject != null && firstObject.Equals(selectedNode))
                 {
                     secondObject = MouseOverObject();
 
-                    if (secondObject && secondObject != firstObject && firstObject.GetComponent<Node>().active)
+                    if (secondObject != null && secondObject.tag == "Node" && secondObject != firstObject && firstObject.GetComponent<Node>().active)
                     {
-                        drawTestLine(firstObject, secondObject);
-                        if (secondObject.gameObject.GetComponent<Node>().active)
-                        {
-                            gameHandler.failedEnd();
-                        }
-                        else
-                        {
-                            secondObject.gameObject.GetComponent<Node>().toggleCore(true);
-                            if (secondObject.GetComponent<Node>().isEndCore)
+                        if(drawLine(firstObject, secondObject)) {
+
+                            if (secondObject.gameObject.GetComponent<Node>().active)
                             {
-                                gameHandler.checkGameFinish();
+                                gameHandler.failedEnd();
                             }
-                        }        
-                        firstObject = secondObject;
-                        selectedNode = secondObject;
+                            else
+                            {
+                                secondObject.gameObject.GetComponent<Node>().toggleCore(true);
+                                if (secondObject.GetComponent<Node>().isEndCore)
+                                {
+                                    gameHandler.checkGameFinish();
+                                }
+                                
+                            }
+                            firstObject = secondObject;
+                            selectedNode = secondObject;
+                            secondObject = null;
+                        }
+                    
+                        
+
+
+                    }
+                    else
+                    {
                         secondObject = null;
-
-
                     }
 
                 }
@@ -101,18 +146,30 @@ public class Drawer : MonoBehaviour {
         return null;
     }
 
-    public void drawTestLine(GameObject s1, GameObject s2)
+    public bool drawLine(GameObject s1, GameObject s2)
     {
 
-        newLine = new GameObject();
-        lineRender = newLine.AddComponent<LineRenderer>();
-        lineRender.startWidth = lineWidth;
-        lineRender.endWidth = lineWidth;
-        lineRender.material = lineMat;
-        lineRender.positionCount = 2;
-        lineRender.SetPositions(new Vector3[] { s1.transform.position, s2.transform.position });
+        foreach(Line l in gameHandler.lines)
+        {
+            if((l.node1.Equals(s1) && l.node2.Equals(s2)) || (l.node1.Equals(s2) && l.node2.Equals(s1)))
+            {
+                newLine = new GameObject();
+                lineRenderer = newLine.AddComponent<LineRenderer>();
+                lineRenderer.startWidth = lineWidth;
+                lineRenderer.endWidth = lineWidth;
+                lineRenderer.material = lineMat;
+                lineRenderer.positionCount = 2;
+                lineRenderer.SetPositions(new Vector3[] { s1.transform.position, s2.transform.position });
+                l.drawnLine = newLine;
+                l.destroyDirectionLine();
 
-        gameHandler.lineObjects.Add(newLine);
+                return true;
+            } 
+
+        }
+        return false;
+        
+       
     }
 
 
@@ -129,53 +186,50 @@ public class Drawer : MonoBehaviour {
                 {
                     if (adjMatrix[i, t] == adjMatrix[t, i])
                     {
-                        //lineCreator(gameHandler.nodeObjects[i], gameHandler.nodeObjects[t], adjMatrix[i, t], arrowPrefab);
+                        createDirectionLine(gameHandler.nodeObjects[i], gameHandler.nodeObjects[t], adjMatrix[i, t], Color.grey, i, t);
                     }
                     else
                     {
-                        //lineCreator(gameHandler.nodeObjects[i], gameHandler.nodeObjects[t], adjMatrix[i, t], arrowPrefab);
+                        createDirectionLine(gameHandler.nodeObjects[i], gameHandler.nodeObjects[t], adjMatrix[i, t], Color.grey, i, t);
 
                     }
                 }
             }
         }
     }
-    public void lineCreator(GameObject startObj, GameObject endObj, int distance, Color c)
+    public void createDirectionLine(GameObject startObj, GameObject endObj, int distance, Color c, int index1, int index2)
     {
-        GameObject line = new GameObject();
+        Line l = new Line();
         List<GameObject> lines = new List<GameObject>();
         Vector3 pos = startObj.transform.position;
-        Vector3 iterationDistance = (endObj.transform.localPosition - startObj.transform.localPosition) / distance;
+        Vector3 iterationDistance = (endObj.transform.localPosition - startObj.transform.localPosition) / (distance*3 + 7);
+        l.nodeIndex1 = index1;
+        l.nodeIndex2 = index2;
+        l.node1 = startObj;
+        l.node2 = endObj;
 
+
+        pos += iterationDistance*4;
         for (int i = 0; i < distance; i++)
         {
+
             newLine = new GameObject();
-            lineRender = newLine.AddComponent<LineRenderer>();
-            lineRender.startWidth = lineWidth;
-            lineRender.endWidth = lineWidth;
-            lineRender.material = new Material(Shader.Find("Sprites/Default"));
-            lineRender.startColor = c;
-            lineRender.endColor = c;
-            lineRender.positionCount = 2;
-            //lineRender.SetPositions(new Vector3[] { s1.transform.position, s2.transform.position });
-        }
+            lineRenderer = newLine.AddComponent<LineRenderer>();
+            lineRenderer.startWidth = lineWidth;
+            lineRenderer.endWidth = lineWidth;
+            lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+            lineRenderer.startColor = c;
+            lineRenderer.endColor = c;
+            lineRenderer.positionCount = 2;
+            lineRenderer.SetPositions(new Vector3[] { pos, pos+iterationDistance*2 });
+            pos += iterationDistance*3;
+            lines.Add(newLine);
 
-    }
-    /*
-    public void lineCreator(GameObject startObj, GameObject endObj, int distance, GameObject prefab)
-    {
-        GameObject line = new GameObject();
-        List<GameObject> arrows = new List<GameObject>();
-        Vector3 pos = startObj.transform.position;
-        Vector3 iterationDistance = (endObj.transform.localPosition - startObj.transform.localPosition) / distance;
-        for(int i=0; i < distance; i++)
-        { 
-            var arrow = Instantiate(prefab, pos, Quaternion.RotateTowards(startObj.transform.localRotation, endObj.transform.localRotation, 5));
-            pos += iterationDistance;
-            arrow.transform.SetParent(line.transform); 
         }
-
+        l.directionLines = lines;
+        gameHandler.lines.Add(l);
+       
     }
-    */
+  
 }
 
