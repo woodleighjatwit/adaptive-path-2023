@@ -574,8 +574,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 554aee826feffa9478629ca964e66afd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timerDelay: 0
-  lineWidth: 0.2
+  directionalLineWidth: 0.05
+  drawLineWidth: 0.4
   matrixHandler: {fileID: 430176978}
   gameHandler: {fileID: 1359566173}
   lineMat: {fileID: 2100000, guid: ab2af015f72c21b4c9912f1aad7d0e8d, type: 2}
@@ -641,7 +641,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nodeObjects: []
-  lineObjects: []
+  lines: []
   nodeCount: 4
   nodePrefab: {fileID: 585438733650908599, guid: 628f2c602f43afb418a029a85e661073, type: 3}
   matrixHandler: {fileID: 430176978}

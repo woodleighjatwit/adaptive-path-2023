@@ -29,6 +29,10 @@ public class MatrixHandler : MonoBehaviour
     {
         // numbers represent length between nodes 
         // row/col are otherway common representation of adjacency matrices 
+        // assumptions: if bi-directional its the same legnth   
+
+        
+
 
         //adjMatrix = new int[4, 4] {{0, 4, 0, 10}, {4, 0, 8, 0}, {0, 8, 0, 4}, {10, 0, 4, 0}};
         adjMatrix = new int[6, 6] { { 0, 6, 18, 16, 10, 8 }, { 6, 0, 10, 12, 10, 0 }, { 18, 10, 0, 18, 10, 16 }, { 16, 12, 18, 0, 8, 8 }, { 10, 10, 10, 8, 0, 2 }, { 8, 0, 16, 8, 2, 0 } };
@@ -228,72 +232,22 @@ public class MatrixHandler : MonoBehaviour
         }
     }
 
-
-    public IEnumerator centerNodes(List<GameObject> nodeList)
+    public void convertActualMatrix(int[,] matrix)
     {
-        Vector3 avgVector = new Vector3(0, 0, 0);
-        foreach(GameObject node in nodeList)
+        int[,] newMatrix = matrix;
+
+        for (int i = 0; i < matrix.GetLength(0); i++)
         {
-            avgVector += node.transform.position;
-
-        }
-        avgVector = avgVector / nodeList.Count;
-
-        Debug.Log(avgVector);
-        for (int i=0; i<100; i++)
-        {
-
-            foreach (GameObject node in nodeList)
+            for (int j = 0; j < matrix.GetLength(1); j++)
             {
-                node.transform.position += (Vector3.zero - avgVector) / 100;
-            }
-
-            yield return new WaitForSeconds(0.001f);
+                //if(newMatrix[i, j] = matrix[i, j])
 
 
 
-        }
-
-        
-    }
-
-    public IEnumerator moveNodesToCenter(List<GameObject> nodeList)
-    {
-        for (int i = 0; i < gameHandler.lines.Count; i++)
-        {
-            gameHandler.lines[i].destroyDirectionLine();
-
-        }
-        yield return new WaitForSeconds(1);
-        for (int i = 0; i < gameHandler.lines.Count; i++)
-        {
-            gameHandler.lines[i].destroyDrawnLine();
-
-        }
-
-        List<GameObject> nodes = nodeList;
-        List<Vector3> pos = new List<Vector3>(); 
-        foreach(GameObject node in nodeList )
-        {
-            pos.Add(node.transform.position);
-        }
-        for (int i=0; i<101; i++)
-        {
-            if (i != 0)
-            { 
-                for (int j=0; j <nodes.Count;j++)
-                {
-
-                    nodeList[j].transform.localScale += new Vector3(0.005f, 0.005f, 0.005f);
-                    nodeList[j].transform.position -= (pos[j] / 100);
-
-
-                }
 
             }
 
-            yield return new WaitForSeconds(0.001f);
-
         }
     }
+    
 }

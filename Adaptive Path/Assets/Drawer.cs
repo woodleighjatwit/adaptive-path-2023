@@ -45,9 +45,8 @@ public class Drawer : MonoBehaviour {
     private LineRenderer lineRenderer;
     private GameObject firstObject;
     private GameObject secondObject;
-    public float timerDelay;
-    private float timer;
-    public float lineWidth;
+    public float directionalLineWidth;
+    public float drawLineWidth;
     [SerializeField] private MatrixHandler matrixHandler;
     [SerializeField] private GameHandler gameHandler;
     [SerializeField] private Material lineMat;
@@ -100,7 +99,7 @@ public class Drawer : MonoBehaviour {
 
                             if (secondObject.gameObject.GetComponent<Node>().active)
                             {
-                                gameHandler.failedEnd();
+                                gameHandler.gameEnd(false);
                             }
                             else
                             {
@@ -155,8 +154,8 @@ public class Drawer : MonoBehaviour {
             {
                 newLine = new GameObject();
                 lineRenderer = newLine.AddComponent<LineRenderer>();
-                lineRenderer.startWidth = lineWidth;
-                lineRenderer.endWidth = lineWidth;
+                lineRenderer.startWidth = drawLineWidth;
+                lineRenderer.endWidth = drawLineWidth;
                 lineRenderer.material = lineMat;
                 lineRenderer.positionCount = 2;
                 lineRenderer.SetPositions(new Vector3[] { s1.transform.position, s2.transform.position });
@@ -184,20 +183,12 @@ public class Drawer : MonoBehaviour {
             {
                 if (adjMatrix[i, t] != 0 && i < t)
                 {
-                    if (adjMatrix[i, t] == adjMatrix[t, i])
-                    {
-                        createDirectionLine(gameHandler.nodeObjects[i], gameHandler.nodeObjects[t], adjMatrix[i, t], Color.grey, i, t);
-                    }
-                    else
-                    {
-                        createDirectionLine(gameHandler.nodeObjects[i], gameHandler.nodeObjects[t], adjMatrix[i, t], Color.grey, i, t);
-
-                    }
+                    createDirectionLine(gameHandler.nodeObjects[i], gameHandler.nodeObjects[t], adjMatrix[i, t], Color.grey, i, t, (adjMatrix[i, t] == adjMatrix[t, i]));
                 }
             }
         }
     }
-    public void createDirectionLine(GameObject startObj, GameObject endObj, int distance, Color c, int index1, int index2)
+    public void createDirectionLine(GameObject startObj, GameObject endObj, int distance, Color c, int index1, int index2, bool biDirectional)
     {
         Line l = new Line();
         List<GameObject> lines = new List<GameObject>();
@@ -208,6 +199,7 @@ public class Drawer : MonoBehaviour {
         l.node1 = startObj;
         l.node2 = endObj;
 
+        Color color = c;
 
         pos += iterationDistance*4;
         for (int i = 0; i < distance; i++)
@@ -215,11 +207,19 @@ public class Drawer : MonoBehaviour {
 
             newLine = new GameObject();
             lineRenderer = newLine.AddComponent<LineRenderer>();
-            lineRenderer.startWidth = lineWidth;
-            lineRenderer.endWidth = lineWidth;
+            lineRenderer.startWidth = directionalLineWidth;
+            lineRenderer.endWidth = directionalLineWidth;
             lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-            lineRenderer.startColor = c;
-            lineRenderer.endColor = c;
+            if((i == distance - 1) || (biDirectional && i == 0))
+            {
+                color = Color.white;
+            }
+            else
+            {
+                color = c;
+            }
+            lineRenderer.startColor = color;
+            lineRenderer.endColor = color;
             lineRenderer.positionCount = 2;
             lineRenderer.SetPositions(new Vector3[] { pos, pos+iterationDistance*2 });
             pos += iterationDistance*3;
